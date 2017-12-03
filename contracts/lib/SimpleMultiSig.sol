@@ -6,7 +6,7 @@ pragma solidity 0.4.18;
 contract SimpleMultiSig {
     uint public nonce;                  // (only) mutable state
     uint public threshold;              // immutable state
-    mapping (address => bool) isOwner;  // immutable state
+    mapping (address => bool) ownerMap; // immutable state
     address[] public owners;            // immutable state
 
     function SimpleMultiSig(
@@ -19,16 +19,18 @@ contract SimpleMultiSig {
         require(_threshold <= _owners.length);
         require(_threshold != 0);
 
-        address lastAdd = address(0); 
+        address lastAddr = address(0); 
         for (uint i=0; i<_owners.length; i++) {
-            require(_owners[i] > lastAdd);
-            isOwner[_owners[i]] = true;
-            lastAdd = _owners[i];
+            address owner = _owners[i];
+            require(owner > lastAddr);
+            ownerMap[owner] = true;
+            lastAddr = owner;
         }
         owners = _owners;
         threshold = _threshold;
     }
 
+    // default function does nothing.
     function () payable public {}
 
     // Note that address recovered from signatures must be strictly increasing.
@@ -57,18 +59,19 @@ contract SimpleMultiSig {
             value,
             data,
             nonce
-          );
+        );
 
-        address lastAdd = address(0); // cannot have address(0) as an owner
+        address lastAddr = address(0); // cannot have address(0) as an owner
 
         for (uint i = 0; i < threshold; i++) {
             address recovered = ecrecover(txHash, sigV[i], sigR[i], sigS[i]);
-            require(recovered > lastAdd && isOwner[recovered]);
-            lastAdd = recovered;
+            require(recovered > lastAddr && ownerMap[recovered]);
+            lastAddr = recovered;
         }
 
         // If we make it here all signatures are accounted for
-        nonce = nonce + 1;
+        nonce++;
+
         require(destination.call.value(value)(data));
     }
 }
