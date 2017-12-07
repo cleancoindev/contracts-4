@@ -791,9 +791,6 @@ contract LoopringProtocolImpl is LoopringProtocol {
             uint availableAmountS = getSpendable(delegate, order.tokenS, order.owner);
             require(availableAmountS > 0); // "order spendable amountS is zero");
 
-            uint availableAmountS = getSpendable(delegate, order.tokenS, order.owner);
-            require(availableAmountS > 0); // "order spendable amountS is zero");
-
             state.fillAmountS = (
                 order.amountS < availableAmountS ?
                 order.amountS : availableAmountS
