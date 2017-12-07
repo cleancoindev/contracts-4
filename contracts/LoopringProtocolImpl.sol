@@ -417,6 +417,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     {
         uint64 _ringIndex = ringIndex ^ ENTERED_MASK;
         address _lrcTokenAddress = lrcTokenAddress;
+
         TokenTransferDelegate delegate = TokenTransferDelegate(delegateAddress);
 
         // Do the hard work.
@@ -786,6 +787,9 @@ contract LoopringProtocolImpl is LoopringProtocol {
 
             require(order.amountS > 0); // "amountS is zero");
             require(order.amountB > 0); // "amountB is zero");
+
+            uint availableAmountS = getSpendable(delegate, order.tokenS, order.owner);
+            require(availableAmountS > 0); // "order spendable amountS is zero");
 
             uint availableAmountS = getSpendable(delegate, order.tokenS, order.owner);
             require(availableAmountS > 0); // "order spendable amountS is zero");
