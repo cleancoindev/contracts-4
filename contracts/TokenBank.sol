@@ -58,14 +58,25 @@ contract ERC20 {
 contract TokenTransferDelegate  {
     using MathUint for uint;
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    /// Structs                                                              ///
+    ////////////////////////////////////////////////////////////////////////////
+
+    struct Account {
+        uint64      ethBalance;
+        address[]   controlledAddresses;
+
+    }
     ////////////////////////////////////////////////////////////////////////////
     /// Variables                                                            ///
     ////////////////////////////////////////////////////////////////////////////
 
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// Structs                                                              ///
-    ////////////////////////////////////////////////////////////////////////////
+    // A mapping from address to its control address.
+    mapping(address => address) controlMap;
+
+    mapping(address => Account) accountMap;
 
 
     ////////////////////////////////////////////////////////////////////////////
@@ -87,5 +98,74 @@ contract TokenTransferDelegate  {
         revert();
     }
 
-    
+    function unbind() public {
+        var controller = controlMap[msg.sender];
+        require(controller != 0x0);
+        unlinkAddress(msg.sender, controller);
+    }
+
+    function bindTo(address controller)
+        public
+    {
+        require(controller != 0x0);
+
+        address prevController = controlMap[msg.sender];
+        require(controller != prevController);
+
+        if (prevController != 0x0) {
+            unlinkAddress(msg.sender, prevController);
+        }
+
+        linkAddress(msg.sender, controller);
+    }
+
+    function getBalance(
+        address controller,
+        address token
+        )
+        public
+        returns (uint balance)
+    {
+        var addrs = accountMap[controller].controlledAddresses;
+        var erc20 = ERC20(token);
+        for (uint i = 0; i < addrs.length; i++) {
+            balance += erc20.balanceOf(addrs[i]);
+        }
+    }
+
+    function getSpendable(
+        address controller,
+        address token
+        )
+        public
+        returns (uint spendable)
+    {
+        var addrs = accountMap[controller].controlledAddresses;
+        var erc20 = ERC20(token);
+        for (uint i = 0; i < addrs.length; i++) {
+            address addr = addrs[i];
+            uint balance = erc20.balanceOf(addr);
+            uint allowance = erc20.allowance(addr, address(this));
+            spendable += balance > allowance ? allowance : balance;
+        }
+    }
+
+    function unlinkAddress(
+        address addr,
+        address controller
+        )
+        internal
+    {
+
+    }
+
+
+    function linkAddress(
+        address addr,
+        address controller
+        )
+        internal
+    {
+
+    }
 }
