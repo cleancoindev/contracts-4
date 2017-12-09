@@ -150,6 +150,31 @@ contract TokenTransferDelegate  {
         }
     }
 
+    function transfer(
+        address token,
+        address target,
+        uint value
+        )
+        public
+    {
+        var addrs = accountMap[msg.sender].controlledAddresses;
+        var erc20 = ERC20(token);
+        uint remaining = value;
+        for (uint i = 0; i < addrs.length; i++) {
+            address addr = addrs[i];
+            uint balance = erc20.balanceOf(addr);
+            uint allowance = erc20.allowance(addr, address(this));
+            uint spendable = balance > allowance ? allowance : balance;
+            if (spendable >= remaining) {
+                erc20.transferFrom(addr, target, remaining);
+                return;
+            } else {
+                remaining -= spendable;
+                erc20.transferFrom(addr, target, spendable);
+            }
+        }
+    }  
+
     function unlinkAddress(
         address addr,
         address controller
