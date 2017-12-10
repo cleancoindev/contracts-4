@@ -24,7 +24,7 @@ import "./MathUint.sol";
 /// @dev Acts as a middle man to transfer ERC20 tokens on behalf of different
 /// versions of Loopring protocol to avoid ERC20 re-authorization.
 /// @author Daniel Wang - <daniel@loopring.org>.
-contract ERC20Controller  {
+contract ERC20AggregationContract  {
     using MathUint for uint;
     ////////////////////////////////////////////////////////////////////////////
     /// Structs                                                              ///
